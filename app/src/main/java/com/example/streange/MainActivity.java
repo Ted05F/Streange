@@ -1,8 +1,10 @@
 package com.example.streange;
 
 import android.os.Bundle;
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +12,7 @@ import com.example.streange.adapter.BookAdapter;
 import com.example.streange.domain.Author;
 import com.example.streange.domain.Book;
 import com.example.streange.domain.Genre;
+import com.example.streange.fragment.AddBookBlankFragment;
 import com.example.streange.nodb.NoDb;
 import com.example.streange.rest.LibraryApiVolley;
 
@@ -22,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private BookAdapter bookAdapter;
     private LibraryApiVolley libraryApiVolley;
 
+    private AppCompatButton btnadd;
+
     private ItemTouchHelper.SimpleCallback simpleCallback;
 
     @Override
@@ -29,8 +34,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        btnadd = findViewById(R.id.btn_add);
+        btnadd.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                AddBookBlankFragment addBookBlankFragment = new AddBookBlankFragment();
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.fl_main, addBookBlankFragment)
+                        .commit();
+
+            }
+        });
+
         libraryApiVolley = new LibraryApiVolley(this);
         libraryApiVolley.fillBook();
+        libraryApiVolley.fillAuthor();
+        libraryApiVolley.fillGenre();
 
         rvBook = findViewById(R.id.rv_book);
         bookAdapter = new BookAdapter(this, NoDb.BOOK_LIST);

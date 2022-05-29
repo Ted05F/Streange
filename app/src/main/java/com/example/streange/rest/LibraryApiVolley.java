@@ -30,7 +30,7 @@ public class LibraryApiVolley implements LibraryApi {
 
     public static final String API_TEST = "API_TEST";
     private final Context context;
-    public static final String BASE_URL = "http://192.168.31.85:8080";
+    public static final String BASE_URL = "http://192.168.31.85:8086";
     private ErrorListener errorListener;
 
     public LibraryApiVolley(Context context) {
@@ -68,7 +68,7 @@ public class LibraryApiVolley implements LibraryApi {
 
                             }
 
-                            ((MainActivity)context).updateAdapter();
+                            ((MainActivity) context).updateAdapter();
                             Log.d(API_TEST, NoDb.BOOK_LIST.toString());
 
                         } catch (JSONException e) {
@@ -86,10 +86,84 @@ public class LibraryApiVolley implements LibraryApi {
     @Override
     public void fillAuthor() {
 
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = BASE_URL + "/author";
+
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+
+                        NoDb.AUTHOR_LIST.clear();
+
+                        try {
+                            for (int i = 0; i < response.length(); i++) {
+
+                                JSONObject jsonObject = response.getJSONObject(i);
+
+                                Author author = new AuthorMapper().authorFromJson(jsonObject);
+                                NoDb.AUTHOR_LIST.add(author);
+
+                            }
+
+                            Log.d(API_TEST, NoDb.AUTHOR_LIST.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                },
+                errorListener
+        );
+
+        requestQueue.add(arrayRequest);
+
     }
 
     @Override
     public void fillGenre() {
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = BASE_URL + "/genre";
+
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+
+                        NoDb.GENRE_LIST.clear();
+
+                        try {
+                            for (int i = 0; i < response.length(); i++) {
+
+                                JSONObject jsonObject = response.getJSONObject(i);
+
+                                Genre genre = new GenreMapper().genreFromJson(jsonObject);
+                                NoDb.GENRE_LIST.add(genre);
+
+                            }
+
+                            Log.d(API_TEST, NoDb.GENRE_LIST.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                },
+                errorListener
+        );
+
+        requestQueue.add(arrayRequest);
 
     }
 
@@ -98,7 +172,7 @@ public class LibraryApiVolley implements LibraryApi {
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = BASE_URL + "/book";
+        String url = BASE_URL + "/book" ;
 
         StringRequest request = new StringRequest(
                 Request.Method.POST,
@@ -112,7 +186,7 @@ public class LibraryApiVolley implements LibraryApi {
                     }
                 },
                 errorListener
-        ){
+        ) {
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -133,6 +207,39 @@ public class LibraryApiVolley implements LibraryApi {
 
     @Override
     public void updateBook(int id, String newBookName, String newAuthorName, String newGenreName) {
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = BASE_URL + "/book/" + id;
+
+        StringRequest request = new StringRequest(
+                Request.Method.PUT,
+                url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        fillBook();
+                        Log.d(API_TEST, response);
+
+                    }
+                },
+                errorListener
+        ) {
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String, String> params = new HashMap<>();
+
+                params.put("nameBook", newBookName);
+                params.put("nameAuthor", newAuthorName);
+                params.put("nameGenre", newGenreName);
+
+                return params;
+            }
+        };
+
+        requestQueue.add(request);
 
     }
 
